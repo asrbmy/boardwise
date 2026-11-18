@@ -1,0 +1,34 @@
+{
+  "name": "boardwise",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Boardwise: a private, offline-first, browser-only infinite whiteboard.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --port 4173 --strictPort",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "node e2e/run.mjs",
+    "test:a11y": "node e2e/a11y.mjs",
+    "test:perf": "node e2e/perf.mjs",
+    "audit:prod": "npm audit --omit=dev"
+  },
+  "dependencies": {
+    "idb": "^8.0.4",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "yjs": "^13.6.33"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.3.0",
+    "axe-core": "^4.14.0",
+    "fake-indexeddb": "^6.2.8",
+    "jsdom": "^31.0.1",
+    "puppeteer": "^25.17.0",
+    "vite": "^8.3.8",
+    "vite-plugin-pwa": "^2.0.0",
+    "vitest": "^5.1.0"
+  }
+}
