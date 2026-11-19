@@ -201,7 +201,8 @@ mark { background: #ffe58a; color: #1b1b1f; border-radius: 3px; padding: 0 1px; 
 /* Responsive: phones & tablets */
 @media (max-width: 860px) {
   /* Bottom of the screen belongs to the toolbar and zoom controls on phones; toasts go under the top bar instead. */
-  .toasts { bottom: auto; top: calc(var(--topbar) + 6px); }
+  .toasts { bottom: max(16px, env(safe-area-inset-bottom)); }
+  body:has(.stage) .toasts { bottom: auto; top: calc(var(--topbar) + 6px); }
   .topbar .name { width: 14ch; }
   .topbar .hide-sm { display: none; }
   .toolbar { inset-inline-start: 50%; top: auto; bottom: 10px; transform: translateX(-50%); flex-direction: row; max-width: calc(100% - 20px); max-height: none; overflow-x: auto; overflow-y: visible; border-radius: 18px; }

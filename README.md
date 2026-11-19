@@ -86,6 +86,7 @@ Notes:
 
 - **Ink to text** (handwriting recognition) is not built. It needs a recognition model, which would conflict with "no network and nothing to download"; "ink to shape" is available instead and runs on your device.
 - Folder sync needs the File System Access API (Chromium browsers). It syncs when you press *Sync now*; it does not watch the folder in the background, and the browser asks you to re-allow access after a restart.
+- Live collaboration needs the two devices to reach each other directly. Wi-Fi that isolates devices, some VPNs and strict firewalls block that; then the connection fails and you would need a STUN server address (see Privacy).
 - Live collaboration is peer to peer with manual codes: collaborators see each other's pointers and names, but there are no rooms or chat. Everyone who is connected needs to stay online; after a disconnect you reconnect with a new code exchange; boards are merged by object, so something deleted on one side while apart can reappear.
 - Translations cover the core interface; see the note above for what falls back to English.
 - Very large images are downscaled on import to keep boards fast and within storage limits.

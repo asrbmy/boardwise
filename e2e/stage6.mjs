@@ -1,5 +1,6 @@
 import { openPage, assert, eq, sleep } from './lib.mjs';
 
+const waitFor = (label) => (page, fn, opts) => page.waitForFunction(fn, opts).catch(() => { throw new Error(`wait #${label} failed: ${String(fn).slice(0, 110)}`); });
 export default async function stage6({ browser, srv, R, url }) {
   console.log('Stage 6: optional peer-to-peer collaboration');
 
@@ -27,18 +28,18 @@ export default async function stage6({ browser, srv, R, url }) {
 
     await a.page.type('[data-testid="collab-answer-in"]', answer);
     await a.page.click('[data-testid="collab-connect"]');
-    for (const { page } of [a, b]) await page.waitForFunction(() => window.__bw.session.connectedCount === 1, { timeout: 15000 });
+    for (const { page } of [a, b]) await waitFor(2)(page, () => window.__bw.session.connectedCount === 1, { timeout: 15000 });
 
     // merged boards
-    for (const { page } of [a, b]) await page.waitForFunction(() => window.__bw.store.get('a1') && window.__bw.store.get('b1'), { timeout: 8000 });
+    for (const { page } of [a, b]) await waitFor(3)(page, () => window.__bw.store.get('a1') && window.__bw.store.get('b1'), { timeout: 8000 });
     // collaborator cursor appears on the other side
     await a.page.evaluate(() => window.__bw.session.setLocal({ x: 40, y: 50, name: 'Ann' }));
-    await b.page.waitForFunction(() => document.querySelector('[data-testid="remote-cursor"]')?.textContent.includes('Ann'), { timeout: 5000 });
+    await waitFor(4)(b.page, () => document.querySelector('[data-testid="remote-cursor"]')?.textContent.includes('Ann'), { timeout: 5000 });
     // live edit, delete
     await a.page.evaluate(() => window.__bw.store.update('b1', { text: 'edited by A' }));
-    await b.page.waitForFunction(() => window.__bw.store.get('b1').text === 'edited by A', { timeout: 5000 });
+    await waitFor(5)(b.page, () => window.__bw.store.get('b1').text === 'edited by A', { timeout: 5000 });
     await b.page.evaluate(() => window.__bw.store.remove(['a1']));
-    await a.page.waitForFunction(() => !window.__bw.store.get('a1'), { timeout: 5000 });
+    await waitFor(6)(a.page, () => !window.__bw.store.get('a1'), { timeout: 5000 });
     // remote edits never land in the other person's undo history
     eq(await a.page.evaluate(() => window.__bw.store.history.undoStack.length), 2, 'A has only its own 2 steps (add, edit)');
     assert((await a.page.$eval('[data-testid="live-pill"]', (e) => e.textContent)).includes('1'), 'live pill shows 1');
@@ -46,7 +47,7 @@ export default async function stage6({ browser, srv, R, url }) {
     eq(await a.page.evaluate(() => window.__bw.store.order), await b.page.evaluate(() => window.__bw.store.order));
     // disconnect
     await a.page.evaluate(() => window.__bw.session.close());
-    await b.page.waitForFunction(() => window.__bw.session.connectedCount === 0, { timeout: 8000 });
+    await waitFor(7)(b.page, () => window.__bw.session.connectedCount === 0, { timeout: 8000 });
     await a.page.close(); await b.page.close();
   });
 

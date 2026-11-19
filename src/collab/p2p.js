@@ -6,7 +6,7 @@
 const MAX_CODE = 64_000;        // characters accepted when pasting a connection code
 const CHUNK = 16_000;           // bytes per data-channel message
 const MAX_MESSAGE = 32_000_000; // reassembled message cap
-const T_SYNC1 = 1, T_UPDATE = 2, T_PRESENCE = 3;
+const T_SYNC1 = 1, T_UPDATE = 2, T_PRESENCE = 3, T_BYE = 4;
 
 // ---- connection codes ----
 const b64 = {
@@ -115,7 +115,7 @@ export class Peer {
     if (buf.length < 10) return;
     const dv = new DataView(buf.buffer, buf.byteOffset, buf.byteLength);
     const type = buf[0], id = dv.getUint32(1), i = dv.getUint16(5), total = dv.getUint16(7);
-    if (!total || i >= total || (type < 1 || type > 3)) return;
+    if (!total || i >= total || (type < 1 || type > 4)) return;
     let m = this.inbox.get(id);
     if (!m) { m = { type, total, parts: [], size: 0 }; this.inbox.set(id, m); if (this.inbox.size > 32) this.inbox.delete(this.inbox.keys().next().value); }
     if (m.parts[i]) return;
@@ -125,6 +125,7 @@ export class Peer {
     this.inbox.delete(id);
     const all = new Uint8Array(m.size); let o = 0; for (const p of m.parts) { all.set(p, o); o += p.length; }
     try {
+      if (m.type === T_BYE) { this._set('closed'); return; } // peer left on purpose: no need to wait for the connection timeout
       if (m.type === T_PRESENCE) { if (all.length <= 1024) this.onPresence?.(JSON.parse(new TextDecoder().decode(all))); return; }
       if (!this.boardDoc) return;
       if (m.type === T_SYNC1) this._send(T_UPDATE, this.boardDoc.diffSince(all));
@@ -132,7 +133,7 @@ export class Peer {
     } catch { /* malformed update from the peer: ignore it, keep the session alive */ }
   }
 
-  close() { this.off?.(); try { this.channel?.close(); this.pc.close(); } catch { /* already closed */ } this._set('closed'); }
+  close() { this.off?.(); try { this._send(T_BYE, new Uint8Array(1)); } catch { /* channel already gone */ } try { this.channel?.close(); this.pc.close(); } catch { /* already closed */ } this._set('closed'); }
 }
 
 export const p2pSupported = () => typeof RTCPeerConnection !== 'undefined';

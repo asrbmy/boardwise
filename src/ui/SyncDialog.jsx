@@ -35,7 +35,7 @@ export default function SyncDialog({ onClose, onChanged }) {
     setBusy(true); announce(t('sync.running'));
     try {
       const r = await F.syncFolder(handle, storage);
-      setReport(r); await load(); onChanged?.();
+      await load(); setReport(r); onChanged?.();
       announce(t('sync.report', { pushed: r.pushed.length, pulled: r.pulled.length, same: r.same }));
     } catch { toast(t('sync.failed'), { kind: 'error' }); }
     setBusy(false);

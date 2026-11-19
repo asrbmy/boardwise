@@ -31,7 +31,7 @@ export async function launch(opts = {}) {
   return puppeteer.launch({
     executablePath: process.env.CHROME_PATH || '/usr/bin/google-chrome',
     headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu-sandbox', ...(opts.args || [])],
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu-sandbox', '--disable-features=WebRtcHideLocalIpsWithMdns', ...(opts.args || [])],
     defaultViewport: opts.viewport || { width: 1280, height: 800 },
   });
 }
