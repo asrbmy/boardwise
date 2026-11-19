@@ -38,7 +38,7 @@ export class CollabSession {
   }
   /** Validate presence from a peer (never trusted), store it, and pass it on to our other peers. */
   receivePresence(raw, from) {
-    if (!raw || raw.k !== 'cur' || typeof raw.id !== 'string' || !/^[\w-]{1,16}$/.test(raw.id) || raw.id === this.me.id) return;
+    if (!raw || raw.k !== 'cur' || typeof raw.id !== 'string' || !/^[\w-]{1,16}$/.test(raw.id) || raw.id.startsWith('__') || raw.id in Object.prototype || raw.id === this.me.id) return;
     const x = raw.x, y = raw.y;
     if (!Number.isFinite(x) || !Number.isFinite(y) || Math.abs(x) > 1e7 || Math.abs(y) > 1e7) return;
     if (!this.presence.has(raw.id) && this.presence.size >= 50) return;

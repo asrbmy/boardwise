@@ -4,12 +4,11 @@
 //
 // Conflict rule: when a board changed on BOTH sides since the last sync, the NEWER edit wins and the
 // OLDER copy is kept as a saved version (up to MAX_VERSIONS per board) that can be restored as a copy.
-import { exportBoardJSON, normaliseBoard, parseImport } from '../core/serialize.js';
+import { exportBoardJSON, normaliseBoard, parseImport, isSafeId } from '../core/serialize.js';
 import { LIMITS } from '../core/sanitize.js';
 
 const SUFFIX = '.boardwise.json';
 export const MAX_VERSIONS = 10;
-const SAFE_ID = /^[\w-]{1,64}$/;
 
 export const folderSyncSupported = () => typeof window !== 'undefined' && typeof window.showDirectoryPicker === 'function';
 
@@ -31,7 +30,7 @@ async function readRemote(dir) {
   for await (const [name, h] of dir.entries()) {
     if (h.kind !== 'file' || !name.endsWith(SUFFIX)) continue;
     const id = name.slice(0, -SUFFIX.length);
-    if (!SAFE_ID.test(id)) { skipped.push({ name, reason: 'name' }); continue; }
+    if (!isSafeId(id)) { skipped.push({ name, reason: 'name' }); continue; }
     try {
       const f = await h.getFile();
       if (f.size > LIMITS.jsonBytes) throw new Error('too large');

@@ -12,7 +12,9 @@ const str = (v, d = '', max = 2000) => (typeof v === 'string' ? cleanText(v, max
 const bool = (v, d = false) => (typeof v === 'boolean' ? v : d);
 const color = (v, d) => (typeof v === 'string' && /^(#[0-9a-f]{3,8}|transparent|rgba?\([\d\s.,%]+\))$/i.test(v.trim()) ? v.trim() : d);
 const oneOf = (v, list, d) => (list.includes(v) ? v : d);
-const id = (v) => (typeof v === 'string' && /^[\w-]{1,64}$/.test(v) ? v : null);
+/** Ids become object keys everywhere, so reject names that would collide with Object.prototype ("__proto__", "constructor", …). */
+export const isSafeId = (v) => typeof v === 'string' && /^[\w-]{1,64}$/.test(v) && !v.startsWith('__') && !(v in Object.prototype);
+const id = (v) => (isSafeId(v) ? v : null);
 
 function endpoint(e) {
   if (!e || typeof e !== 'object') return { x: 0, y: 0 };

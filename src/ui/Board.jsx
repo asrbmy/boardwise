@@ -133,8 +133,10 @@ function BoardView({ store, recovered }) {
   // ----- attach engine to the canvas -----
   useEffect(() => {
     engine.attach(stageRef.current, canvasRef.current);
-    if (!store.meta.view || (store.meta.view.x === 0 && store.meta.view.y === 0 && store.meta.view.zoom === 1 && store.size === 0)) engine.resetView();
-    else if (store.size) { /* restore saved view */ }
+    // A board that has never been panned or zoomed (fresh from a template or an import) opens fitted to its content;
+    // otherwise the saved view is restored.
+    const v = store.meta.view;
+    if (!v || (v.x === 0 && v.y === 0 && v.zoom === 1)) { if (store.size) engine.openFit(); else engine.resetView(); }
     canvasRef.current.focus({ preventScroll: true });
     // Test/debug hook, enabled only with ?e2e in the URL (never in normal use).
     if (/[?&#]e2e\b/.test(location.href) || localStorage.getItem('boardwise.debug') === '1') window.__bw = { store, engine, resolveConnector, runExport, session };
@@ -290,10 +292,10 @@ function BoardView({ store, recovered }) {
         <span className="grow" />
         <button className="btn ghost icon-only" onClick={() => engine.undo()} disabled={!store.history.canUndo} aria-label={`${t('common.undo')} (Ctrl+Z)`} title={`${t('common.undo')} (Ctrl+Z)`}><Icon name="undo" /></button>
         <button className="btn ghost icon-only" onClick={() => engine.redo()} disabled={!store.history.canRedo} aria-label={`${t('common.redo')} (Ctrl+Shift+Z)`} title={`${t('common.redo')} (Ctrl+Shift+Z)`}><Icon name="redo" /></button>
-        <button className="btn ghost icon-only" onClick={() => setPanel((p) => (p === 'search' ? null : 'search'))} aria-pressed={panel === 'search'} aria-label={`${t('search.title')} (Ctrl+F)`} title={`${t('search.title')} (Ctrl+F)`} data-testid="open-search"><Icon name="search" /></button>
+        <button className="btn ghost icon-only hide-xs" onClick={() => setPanel((p) => (p === 'search' ? null : 'search'))} aria-pressed={panel === 'search'} aria-label={`${t('search.title')} (Ctrl+F)`} title={`${t('search.title')} (Ctrl+F)`} data-testid="open-search"><Icon name="search" /></button>
         <button className="btn ghost icon-only hide-sm" onClick={() => setDialog('palette')} aria-label={`${t('palette.title')} (Ctrl+K)`} title={`${t('palette.title')} (Ctrl+K)`} data-testid="open-palette"><Icon name="command" /></button>
-        <button className="btn ghost icon-only" onClick={() => setPresent(true)} aria-label={t('present.title')} title={t('present.title')} data-testid="open-present"><Icon name="present" /></button>
-        <MenuButton label={t('workshop.menu')} icon="users" menuClass="workshop-menu">
+        <button className="btn ghost icon-only hide-xs" onClick={() => setPresent(true)} aria-label={t('present.title')} title={t('present.title')} data-testid="open-present"><Icon name="present" /></button>
+        <MenuButton label={t('workshop.menu')} icon="users" menuClass="workshop-menu" wrapClass="hide-xs">
           <MenuItem icon="timer" onClick={() => setDialog('timer')} data-testid="menu-timer">{t('timer.title')}</MenuItem>
           <MenuItem icon="vote" role="menuitemcheckbox" aria-checked={voting} onClick={toggleVoting} data-testid="menu-voting">{t(voting ? 'vote.stop' : 'vote.title')}</MenuItem>
           <MenuItem icon="notes" onClick={() => openPanel('notes')} data-testid="menu-notes">{t('notes.title')}</MenuItem>
@@ -303,6 +305,14 @@ function BoardView({ store, recovered }) {
           <MenuItem icon="download" onClick={() => setDialog('export')} data-testid="menu-export">{t('export.title')}</MenuItem>
           <MenuItem icon="upload" onClick={() => setDialog('import')} data-testid="menu-import">{t('import.title')}</MenuItem>
           <MenuItem icon="users" onClick={() => setDialog('collab')} data-testid="menu-collab">{t('collab.title')}</MenuItem>
+          {/* Phones: the top bar has no room for these, so they live here instead. */}
+          <hr className="only-xs" />
+          <MenuItem className="only-xs" icon="search" onClick={() => setPanel('search')}>{t('search.title')}</MenuItem>
+          <MenuItem className="only-xs" icon="present" onClick={() => setPresent(true)}>{t('present.title')}</MenuItem>
+          <MenuItem className="only-xs" icon="timer" onClick={() => setDialog('timer')}>{t('timer.title')}</MenuItem>
+          <MenuItem className="only-xs" icon="vote" role="menuitemcheckbox" aria-checked={voting} onClick={toggleVoting}>{t(voting ? 'vote.stop' : 'vote.title')}</MenuItem>
+          <MenuItem className="only-xs" icon="notes" onClick={() => openPanel('notes')}>{t('notes.title')}</MenuItem>
+          <MenuItem className="only-xs" icon="comment" onClick={() => openPanel('comments')}>{t('comment.panel')}</MenuItem>
         </MenuButton>
         <MenuButton label={t('board.view')} icon="grid" menuClass="view-menu">
           <div className="heading">{t('board.background')}</div>

@@ -15,6 +15,7 @@
 
 * { box-sizing: border-box; }
 html, body, #root { height: 100%; margin: 0; }
+@supports (height: 100dvh) { html, body, #root { height: 100dvh; } }
 body { font: 15px/1.45 system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', 'Noto Sans Devanagari', 'Noto Sans Arabic', 'Noto Sans Hebrew', sans-serif; background: var(--bg); color: var(--text); overscroll-behavior: none; -webkit-tap-highlight-color: transparent; }
 button, input, select, textarea { font: inherit; color: inherit; }
 :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
@@ -227,3 +228,46 @@ ul.plain { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .remote-cursor span { position: absolute; inset-inline-start: 14px; top: 14px; background: currentColor; padding: 1px 6px; border-radius: 6px; font-size: 12px; white-space: nowrap; }
 .remote-cursor span { color: #fff; background: inherit; }
 @media (prefers-reduced-motion: reduce) { .remote-cursor { transition: none; } }
+
+/* ---- polish & responsive refinements ---- */
+.template { transition: transform .12s ease, border-color .12s ease, box-shadow .12s ease; }
+.template:hover { transform: translateY(-1px); box-shadow: var(--shadow); }
+.card { transition: border-color .12s ease, box-shadow .12s ease; }
+.card:hover { box-shadow: var(--shadow); }
+.btn { transition: background .12s ease, border-color .12s ease, filter .12s ease; }
+.btn:active:not(:disabled) { transform: translateY(1px); }
+.dialog { max-height: min(92dvh, 900px); }
+@media (prefers-reduced-motion: reduce) { .template, .card, .btn { transition: none; } .template:hover { transform: none; } }
+
+/* Notches and home indicators */
+.topbar { padding-inline: max(10px, env(safe-area-inset-left)) max(10px, env(safe-area-inset-right)); }
+@media (max-width: 860px) {
+  .toolbar { bottom: max(10px, env(safe-area-inset-bottom)); }
+  .toolbar-toggle { bottom: max(10px, env(safe-area-inset-bottom)); inset-inline-start: max(10px, env(safe-area-inset-left)); }
+  .corner { bottom: calc(76px + env(safe-area-inset-bottom)); inset-inline-end: max(10px, env(safe-area-inset-right)); }
+  /* The template list becomes one swipeable row instead of nine stacked cards. */
+  .templates { grid-auto-flow: column; grid-template-columns: none; grid-auto-columns: minmax(150px, 44%); overflow-x: auto; padding-bottom: 6px; scroll-snap-type: x proximity; margin-inline: -16px; padding-inline: 16px; scrollbar-width: thin; }
+  .templates .template { scroll-snap-align: start; }
+}
+/* Small phones: the minimap would cover too much of the board; the zoom controls stay. */
+@media (max-width: 600px) { .minimap { display: none; } .corner { align-items: flex-end; } }
+/* Landscape phones: very little height, so keep chrome compact and dialogs scrollable. */
+@media (max-height: 480px) {
+  :root { --topbar: 46px; }
+  .dialog { max-height: 96dvh; }
+  .inspector { max-height: calc(100dvh - var(--topbar) - 70px); overflow: auto; }
+}
+
+/* Phones: fewer top-bar controls; the rest live in the File menu (see Board.jsx). */
+.menu .only-xs { display: none; }
+@media (max-width: 600px) {
+  .hide-xs { display: none !important; }
+  .menu button.only-xs { display: flex; } .menu hr.only-xs { display: block; }
+  .topbar { gap: 2px; }
+  .topbar .btn.icon-only { min-width: 44px; width: 44px; }
+  .topbar .name { min-width: 0; width: auto; flex: 1 1 60px; }
+  .save-status { padding: 0 4px; }
+  .save-status { font-size: 0; gap: 0; }   /* dot only; the status text is still read by screen readers via role=status */
+  .save-status .dot { width: 10px; height: 10px; }
+  .live-pill { font-size: 11px; padding: 1px 6px; }
+}

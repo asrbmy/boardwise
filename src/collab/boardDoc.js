@@ -8,6 +8,7 @@ import * as Y from 'yjs';
 import { normaliseObject } from '../core/serialize.js';
 
 const LOCAL = Symbol('local');
+const MAX_REMOTE_OBJECTS = 20000; // a peer cannot make this board unmanageably large
 
 export class BoardDoc {
   constructor(store) {
@@ -53,7 +54,9 @@ export class BoardDoc {
   /** Rebuild the local store from the doc after remote changes. */
   pullRemote() {
     const next = {};
+    let count = 0;
     for (const [id, raw] of this.objects.entries()) {
+      if (++count > MAX_REMOTE_OBJECTS) break;
       const prev = this.last.get(id);
       if (prev && JSON.stringify(prev) === JSON.stringify(raw)) { next[id] = prev; continue; }
       const clean = normaliseObject(raw);

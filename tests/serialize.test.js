@@ -71,3 +71,15 @@ describe('serialisation', () => {
     expect({}.polluted).toBeUndefined();
   });
 });
+
+describe('reserved ids', () => {
+  it('rejects ids that collide with Object.prototype, in objects, groups, connectors and votes', async () => {
+    const { normaliseObject, isSafeId } = await import('../src/core/serialize.js');
+    for (const bad of ['__proto__', 'constructor', 'toString', 'hasOwnProperty', '__x']) expect(isSafeId(bad)).toBe(false);
+    expect(isSafeId('abc-123_X')).toBe(true);
+    expect(normaliseObject({ id: '__proto__', type: 'sticky', x: 0, y: 0 })).toBeNull();
+    const s = normaliseObject({ id: 'ok', type: 'sticky', x: 0, y: 0, votes: { constructor: 3, __proto__: 4, fine: 2 } });
+    expect(Object.keys(s.votes)).toEqual(['fine']);
+    expect(Object.getPrototypeOf(s.votes)).toBe(Object.prototype);
+  });
+});

@@ -146,6 +146,15 @@ export class Engine {
     if (!rect) return this.resetView();
     this.setView(fitRect(rect, this.size.w, this.size.h));
   }
+  /** First open of an unvisited board: fit the content, but never so far out that text drops to the low-detail view. */
+  openFit(minZoom = 0.4) {
+    const rect = contentBounds(this.store);
+    if (!rect) return this.resetView();
+    const fit = fitRect(rect, this.size.w, this.size.h);
+    if (fit.zoom >= minZoom) return this.setView(fit);
+    const z = minZoom; // too wide to fit legibly: start at the content's top-left corner and let the user pan
+    this.setView({ zoom: z, x: rect.x - 40 / z, y: rect.y + Math.min(rect.h, this.size.h / z - 80 / z) / 2 - this.size.h / 2 / z });
+  }
   /** Center the view on a world rect, keeping zoom unless it would be off-screen. */
   focusRect(rect, { minZoom = 0.5 } = {}) {
     const zoom = clamp(Math.max(this.view.zoom, minZoom), MIN_ZOOM, MAX_ZOOM);

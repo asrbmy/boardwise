@@ -57,7 +57,7 @@ export function ConfirmDialog({ title, message, confirmLabel, onConfirm, onClose
 }
 
 /** Button + dropdown menu with Escape/outside-click close and arrow-key navigation. */
-export function MenuButton({ label, icon, children, className = 'btn ghost icon-only', menuClass = '', text }) {
+export function MenuButton({ label, icon, children, className = 'btn ghost icon-only', menuClass = '', text, wrapClass = '' }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
   useEffect(() => {
@@ -77,7 +77,7 @@ export function MenuButton({ label, icon, children, className = 'btn ghost icon-
   };
   useEffect(() => { if (open) ref.current?.querySelector('.menu .item')?.focus(); }, [open]);
   return (
-    <span style={{ position: 'relative', display: 'inline-block' }} ref={ref} onKeyDown={onKey}>
+    <span className={wrapClass} style={{ position: 'relative', display: 'inline-block' }} ref={ref} onKeyDown={onKey}>
       <button className={className} aria-haspopup="menu" aria-expanded={open} aria-label={label} title={label} onClick={() => setOpen((o) => !o)}>
         {icon && <Icon name={icon} />}{text}
       </button>
@@ -85,8 +85,8 @@ export function MenuButton({ label, icon, children, className = 'btn ghost icon-
     </span>
   );
 }
-export const MenuItem = ({ icon, children, shortcut, ...p }) => (
-  <button className="item" role="menuitem" {...p}>{icon && <Icon name={icon} />}<span>{children}</span>{shortcut && <span className="sc">{shortcut}</span>}</button>
+export const MenuItem = ({ icon, children, shortcut, className = '', ...p }) => (
+  <button className={`item ${className}`.trim()} role="menuitem" {...p}>{icon && <Icon name={icon} />}<span>{children}</span>{shortcut && <span className="sc">{shortcut}</span>}</button>
 );
 
 export function Toasts({ toasts, dismiss }) {
